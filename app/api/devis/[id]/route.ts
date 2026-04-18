@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getOrCreateSubscription } from "@/lib/subscriptions";
+import { getSubscriptionState, isPro } from "@/lib/subscriptions-shared";
 import type { Statut } from "@/lib/types";
 
 const STATUTS_VALIDES: Statut[] = ["en_attente", "relance", "gagne", "perdu"];
@@ -14,16 +16,29 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   const { id } = await params;
-  const body = await req.json();
-  const { statut } = body as { statut: Statut };
+  const body = (await req.json()) as { statut?: Statut; notes?: string | null };
 
-  if (!STATUTS_VALIDES.includes(statut)) {
-    return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+  const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+  if (body.statut !== undefined) {
+    if (!STATUTS_VALIDES.includes(body.statut)) {
+      return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+    }
+    update.statut = body.statut;
+  }
+
+  if (body.notes !== undefined) {
+    const subscription = await getOrCreateSubscription(user.id);
+    const state = getSubscriptionState(subscription);
+    if (!isPro(state)) {
+      return NextResponse.json({ error: "Fonctionnalité réservée aux abonnés" }, { status: 402 });
+    }
+    update.notes = body.notes;
   }
 
   const { data, error } = await supabase
     .from("devis")
-    .update({ statut, updated_at: new Date().toISOString() })
+    .update(update)
     .eq("id", id)
     .eq("user_id", user.id)
     .select()

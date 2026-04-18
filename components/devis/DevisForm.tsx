@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function DevisForm() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function DevisForm() {
       return;
     }
 
+    toast.success("Devis enregistré — relances programmées ✓");
     router.push("/app");
     router.refresh();
   }

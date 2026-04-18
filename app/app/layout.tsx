@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
 import TrialBanner from "@/components/TrialBanner";
+import ToastListener from "@/components/ToastListener";
 import { getOrCreateSubscription, hasActiveAccess } from "@/lib/subscriptions";
 
 export default async function DashboardLayout({
@@ -80,6 +81,7 @@ export default async function DashboardLayout({
         </nav>
         <TrialBanner subscription={subscription} />
         <main className="dash-main">{children}</main>
+        <ToastListener />
       </div>
     </>
   );

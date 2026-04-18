@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
 import type { Devis, Statut } from "@/lib/types";
+import DevisEmptyState from "@/components/devis/DevisEmptyState";
 
 const STATUT_CONFIG: Record<Statut, { label: string; color: string }> = {
   en_attente: { label: "En attente", color: "#B45309" },
@@ -19,17 +22,22 @@ function formatMontant(montant: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(montant);
 }
 
-export default function DevisTable({ devis }: { devis: Devis[] }) {
+export default function DevisTable({ devis, isPro }: { devis: Devis[]; isPro: boolean }) {
   const router = useRouter();
   const [updating, setUpdating] = useState<string | null>(null);
+  const [noteDevis, setNoteDevis] = useState<Devis | null>(null);
+  const [noteValue, setNoteValue] = useState("");
+  const [noteSaving, setNoteSaving] = useState(false);
 
   async function updateStatut(id: string, statut: Statut) {
     setUpdating(id);
-    await fetch(`/api/devis/${id}`, {
+    const res = await fetch(`/api/devis/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ statut }),
     });
+    if (res.ok) toast.success("Statut mis à jour");
+    else toast.error("Impossible de modifier le statut");
     router.refresh();
     setUpdating(null);
   }
@@ -37,34 +45,37 @@ export default function DevisTable({ devis }: { devis: Devis[] }) {
   async function deleteDevis(id: string) {
     if (!confirm("Supprimer ce devis ?")) return;
     setUpdating(id);
-    await fetch(`/api/devis/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/devis/${id}`, { method: "DELETE" });
+    if (res.ok) toast.success("Devis supprimé");
+    else toast.error("Suppression impossible");
     router.refresh();
     setUpdating(null);
   }
 
-  if (devis.length === 0) {
-    return (
-      <>
-        <style>{`
-          .empty-state {
-            background: #fff;
-            border-radius: 16px;
-            border: 1px solid #ECEAE6;
-            padding: 64px 24px;
-            text-align: center;
-          }
-          .empty-icon { font-size: 40px; margin-bottom: 16px; }
-          .empty-title { font-family: 'Fraunces', serif; font-size: 20px; color: #1C2B1A; margin-bottom: 8px; }
-          .empty-desc { font-size: 14px; color: #9A9A9A; }
-        `}</style>
-        <div className="empty-state">
-          <div className="empty-icon">📋</div>
-          <p className="empty-title">Aucun devis pour l&apos;instant</p>
-          <p className="empty-desc">Ajoutez votre premier devis pour démarrer les relances automatiques.</p>
-        </div>
-      </>
-    );
+  function openNote(d: Devis) {
+    setNoteDevis(d);
+    setNoteValue(d.notes ?? "");
   }
+
+  async function saveNote() {
+    if (!noteDevis) return;
+    setNoteSaving(true);
+    const res = await fetch(`/api/devis/${noteDevis.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes: noteValue }),
+    });
+    setNoteSaving(false);
+    if (res.ok) {
+      toast.success("Note enregistrée");
+      setNoteDevis(null);
+      router.refresh();
+    } else {
+      toast.error("Enregistrement impossible");
+    }
+  }
+
+  if (devis.length === 0) return <DevisEmptyState />;
 
   return (
     <>
@@ -99,14 +110,6 @@ export default function DevisTable({ devis }: { devis: Devis[] }) {
         .montant { font-family: 'Fraunces', serif; font-size: 16px; color: #1C2B1A; }
         .date-text { color: #6B7280; }
         .relances-text { color: #6B7280; }
-        .statut-badge {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 500;
-          background: #F7F5F2;
-        }
         .statut-select {
           font-size: 12px;
           border: 1.5px solid #ECEAE6;
@@ -119,6 +122,21 @@ export default function DevisTable({ devis }: { devis: Devis[] }) {
           outline: none;
         }
         .statut-select:focus { border-color: #1C2B1A; }
+        .row-actions { display: inline-flex; gap: 4px; align-items: center; }
+        .icon-btn {
+          background: none;
+          border: none;
+          color: #9A9A9A;
+          cursor: pointer;
+          font-size: 14px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          transition: color 0.15s, background 0.15s;
+          text-decoration: none;
+        }
+        .icon-btn:hover { color: #1C2B1A; background: #FAFAF8; }
+        .icon-btn.note-active { color: #8A5A1A; }
+        .icon-btn.locked { color: #BFB8A8; cursor: pointer; }
         .delete-btn {
           background: none;
           border: none;
@@ -144,10 +162,43 @@ export default function DevisTable({ devis }: { devis: Devis[] }) {
           .mobile-card-top { display: flex; justify-content: space-between; margin-bottom: 12px; }
           .mobile-card-bottom { display: flex; justify-content: space-between; align-items: center; }
         }
+
+        /* Note modal */
+        .note-backdrop {
+          position: fixed; inset: 0; background: rgba(28,43,26,0.4);
+          display: flex; align-items: center; justify-content: center;
+          z-index: 50; padding: 20px;
+        }
+        .note-modal {
+          background: #fff; border-radius: 14px; padding: 24px;
+          width: 100%; max-width: 460px;
+          box-shadow: 0 20px 60px rgba(28,43,26,0.2);
+        }
+        .note-modal h3 {
+          font-family: 'Fraunces', serif; font-size: 20px; color: #1C2B1A;
+          margin-bottom: 4px;
+        }
+        .note-modal p { font-size: 13px; color: #9A9A9A; margin-bottom: 16px; }
+        .note-modal textarea {
+          width: 100%; min-height: 120px;
+          border: 1.5px solid #ECEAE6; border-radius: 10px;
+          padding: 12px; font-family: inherit; font-size: 14px;
+          color: #1C2B1A; resize: vertical; outline: none;
+        }
+        .note-modal textarea:focus { border-color: #1C2B1A; }
+        .note-actions {
+          display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;
+        }
+        .note-btn {
+          padding: 9px 16px; border-radius: 10px; font-size: 13px;
+          font-family: inherit; cursor: pointer; border: 1px solid #D9D5CC;
+          background: #fff; color: #1C2B1A;
+        }
+        .note-btn.primary { background: #1C2B1A; color: #F7F5F2; border-color: #1C2B1A; }
+        .note-btn:disabled { opacity: 0.6; cursor: not-allowed; }
       `}</style>
 
       <div className="table-wrap">
-        {/* Desktop */}
         <table className="devis-table">
           <thead>
             <tr>
@@ -184,14 +235,28 @@ export default function DevisTable({ devis }: { devis: Devis[] }) {
                   </select>
                 </td>
                 <td style={{ textAlign: "right" }}>
-                  <button onClick={() => deleteDevis(d.id)} disabled={updating === d.id} className="delete-btn">✕</button>
+                  <div className="row-actions">
+                    {isPro ? (
+                      <button
+                        onClick={() => openNote(d)}
+                        className={`icon-btn ${d.notes ? "note-active" : ""}`}
+                        title={d.notes ? "Voir / modifier la note" : "Ajouter une note"}
+                      >
+                        {d.notes ? "📝" : "＋ note"}
+                      </button>
+                    ) : (
+                      <Link href="/subscribe" className="icon-btn locked" title="Notes privées : fonctionnalité abonnés">
+                        🔒 note
+                      </Link>
+                    )}
+                    <button onClick={() => deleteDevis(d.id)} disabled={updating === d.id} className="delete-btn">✕</button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Mobile */}
         <div className="mobile-cards">
           {devis.map((d) => (
             <div key={d.id} className="mobile-card">
@@ -215,12 +280,44 @@ export default function DevisTable({ devis }: { devis: Devis[] }) {
                   <option value="gagne">Gagné</option>
                   <option value="perdu">Perdu</option>
                 </select>
-                <button onClick={() => deleteDevis(d.id)} disabled={updating === d.id} className="delete-btn">✕</button>
+                <div className="row-actions">
+                  {isPro ? (
+                    <button onClick={() => openNote(d)} className={`icon-btn ${d.notes ? "note-active" : ""}`}>
+                      {d.notes ? "📝" : "＋ note"}
+                    </button>
+                  ) : (
+                    <Link href="/subscribe" className="icon-btn locked">🔒 note</Link>
+                  )}
+                  <button onClick={() => deleteDevis(d.id)} disabled={updating === d.id} className="delete-btn">✕</button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {noteDevis && (
+        <div className="note-backdrop" onClick={() => setNoteDevis(null)}>
+          <div className="note-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Note privée</h3>
+            <p>{noteDevis.nom_client} — visible uniquement par vous.</p>
+            <textarea
+              value={noteValue}
+              onChange={(e) => setNoteValue(e.target.value)}
+              placeholder="Ex. A rappelé lundi, attend un devis ajusté sur le carrelage…"
+              autoFocus
+            />
+            <div className="note-actions">
+              <button className="note-btn" onClick={() => setNoteDevis(null)} disabled={noteSaving}>
+                Annuler
+              </button>
+              <button className="note-btn primary" onClick={saveNote} disabled={noteSaving}>
+                {noteSaving ? "Enregistrement…" : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

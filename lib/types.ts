@@ -10,9 +10,18 @@ export interface Devis {
   statut: Statut;
   nb_relances: number;
   derniere_relance_at: string | null;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export type SubscriptionState =
+  | "trial_unpaid"
+  | "trial_paid"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "expired";
 
 export type SubscriptionStatus =
   | "trialing"

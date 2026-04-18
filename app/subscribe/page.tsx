@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getOrCreateSubscription, hasActiveAccess, daysLeftInTrial } from "@/lib/subscriptions";
+import { getOrCreateSubscription } from "@/lib/subscriptions";
+import { daysLeftInTrial, isPro, getSubscriptionState } from "@/lib/subscriptions-shared";
 import SubscribeClient from "@/components/SubscribeClient";
 
 export default async function SubscribePage() {
@@ -10,7 +11,14 @@ export default async function SubscribePage() {
   if (!user) redirect("/login?redirect=/subscribe");
 
   const subscription = await getOrCreateSubscription(user.id);
-  const hasAccess = hasActiveAccess(subscription);
+  const state = getSubscriptionState(subscription);
+
+  // Déjà abonné (trial payé ou actif) → retour au dashboard
+  if (isPro(state)) {
+    redirect("/app");
+  }
+
+  const hasAccess = state === "trial_unpaid";
   const daysLeft = daysLeftInTrial(subscription);
 
   return (
