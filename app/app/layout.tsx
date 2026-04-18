@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
+import TrialBanner from "@/components/TrialBanner";
+import { getOrCreateSubscription, hasActiveAccess } from "@/lib/subscriptions";
 
 export default async function DashboardLayout({
   children,
@@ -13,10 +15,15 @@ export default async function DashboardLayout({
 
   if (!user) redirect("/login");
 
+  const subscription = await getOrCreateSubscription(user.id);
+
+  if (!hasActiveAccess(subscription)) {
+    redirect("/subscribe");
+  }
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap');
         .dash-root { min-height: 100vh; background: #F7F5F2; font-family: 'DM Sans', sans-serif; }
         .dash-nav {
           background: #1C2B1A;
@@ -54,18 +61,24 @@ export default async function DashboardLayout({
           margin: 0 auto;
           padding: 40px 24px;
         }
+        @media (max-width: 640px) {
+          .dash-nav { padding: 0 20px; }
+          .dash-nav-email { display: none; }
+          .dash-main { padding: 24px 20px; }
+        }
       `}</style>
       <div className="dash-root">
         <nav className="dash-nav">
-          <Link href="/" className="dash-nav-brand">
+          <Link href="/app" className="dash-nav-brand">
             <span className="dash-nav-brand-dot" />
-            RelanceDevis
+            Relya
           </Link>
           <div className="dash-nav-right">
             <span className="dash-nav-email">{user.email}</span>
             <LogoutButton />
           </div>
         </nav>
+        <TrialBanner subscription={subscription} />
         <main className="dash-main">{children}</main>
       </div>
     </>

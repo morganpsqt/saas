@@ -18,7 +18,7 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error, data } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       setError(error.message);
@@ -26,8 +26,14 @@ export default function SignupPage() {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    // Si auto-confirm activé (dev) ou si session immédiate → redirige vers /app
+    // Sinon (email confirmation requise) → message d'info
+    if (data.session) {
+      router.push("/app");
+      router.refresh();
+    } else {
+      router.push("/login?confirm=1");
+    }
   }
 
   return (

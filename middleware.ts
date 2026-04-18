@@ -1,5 +1,27 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+
+type CookieToSet = { name: string; value: string; options?: CookieOptions };
+
+// Routes publiques — accessibles sans authentification
+const PUBLIC_PATHS = [
+  "/",
+  "/pricing",
+  "/cgu",
+  "/mentions-legales",
+  "/politique-confidentialite",
+];
+
+// Routes d'auth — uniquement pour utilisateurs non connectés
+const AUTH_PATHS = ["/login", "/signup"];
+
+function isPublic(pathname: string) {
+  return PUBLIC_PATHS.includes(pathname);
+}
+
+function isAuthPath(pathname: string) {
+  return AUTH_PATHS.some((p) => pathname.startsWith(p));
+}
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -12,7 +34,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
@@ -29,20 +51,31 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/signup");
+  const { pathname } = request.nextUrl;
 
-  if (!user && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // Utilisateur connecté tentant d'accéder aux pages auth → /app
+  if (user && isAuthPath(pathname)) {
+    return NextResponse.redirect(new URL("/app", request.url));
   }
 
-  if (user && isAuthPage) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // Routes publiques : toujours accessibles
+  if (isPublic(pathname) || isAuthPath(pathname)) {
+    return supabaseResponse;
+  }
+
+  // Routes protégées (/app/*, /subscribe) : nécessitent connexion
+  if (!user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    // On exclut les endpoints API, les assets statiques et le webhook Stripe
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|webp|gif|ico)).*)",
+  ],
 };

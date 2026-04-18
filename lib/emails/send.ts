@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { emailRelance1, emailRelance2, emailRelance3 } from "./templates";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.RESEND_FROM ?? "RelanceDevis <noreply@relancedevis.fr>";
+const FROM = process.env.RESEND_FROM ?? "Relya <onboarding@resend.dev>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 interface SendRelanceParams {

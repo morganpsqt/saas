@@ -35,7 +35,7 @@ export default function DevisForm() {
       return;
     }
 
-    router.push("/");
+    router.push("/app");
     router.refresh();
   }
 

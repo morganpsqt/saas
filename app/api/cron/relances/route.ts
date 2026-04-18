@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { sendRelanceEmail } from "@/lib/emails/send";
 
 // Vercel Cron déclenche ce endpoint chaque matin à 8h (vercel.json)
-// Sécurisé par CRON_SECRET pour éviter les appels non autorisés
+// Sécurisé par CRON_SECRET pour éviter les appels non autorisés.
 
 function diffJours(date: string): number {
   const envoi = new Date(date);
@@ -16,30 +16,34 @@ function diffJours(date: string): number {
 export async function GET(req: NextRequest) {
   const secret = req.headers.get("authorization")?.replace("Bearer ", "");
 
-  if (secret !== process.env.CRON_SECRET) {
+  // Vercel Cron passe aussi la secret via ?secret=... — on accepte les deux
+  const querySecret = req.nextUrl.searchParams.get("secret");
+  const providedSecret = secret ?? querySecret;
+
+  if (providedSecret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const supabase = await createClient();
+  // On utilise le client admin (service_role) pour lire tous les devis + les users
+  const admin = createAdminClient();
 
-  // Récupérer tous les devis encore actifs (pas gagnés ni perdus)
-  const { data: devis, error } = await supabase
+  const { data: devis, error } = await admin
     .from("devis")
-    .select("*, user_id")
+    .select("*")
     .in("statut", ["en_attente", "relance"]);
 
   if (error) {
-    console.error("Erreur fetch devis:", error);
+    console.error("[cron] fetch devis error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Récupérer les emails des artisans
+  // Récupérer les emails des artisans via auth admin
   const userIds = [...new Set(devis?.map((d) => d.user_id) ?? [])];
   const artisanEmails: Record<string, string> = {};
 
   for (const userId of userIds) {
-    const { data: { user } } = await supabase.auth.admin.getUserById(userId);
-    if (user?.email) artisanEmails[userId] = user.email;
+    const { data: userData } = await admin.auth.admin.getUserById(userId);
+    if (userData?.user?.email) artisanEmails[userId] = userData.user.email;
   }
 
   let relancesEnvoyees = 0;
@@ -49,16 +53,18 @@ export async function GET(req: NextRequest) {
     const jours = diffJours(devis_item.date_envoi);
     const nbRelances = devis_item.nb_relances ?? 0;
 
-    // Déterminer si une relance est due
     let numeroRelance: 1 | 2 | 3 | null = null;
-
     if (jours >= 2 && nbRelances === 0) numeroRelance = 1;
     else if (jours >= 5 && nbRelances === 1) numeroRelance = 2;
     else if (jours >= 10 && nbRelances === 2) numeroRelance = 3;
 
     if (!numeroRelance) continue;
 
-    const artisanEmail = artisanEmails[devis_item.user_id] ?? "contact@artisan.fr";
+    const artisanEmail = artisanEmails[devis_item.user_id];
+    if (!artisanEmail) {
+      erreurs.push(`devis ${devis_item.id}: email artisan introuvable`);
+      continue;
+    }
 
     try {
       await sendRelanceEmail({
@@ -69,8 +75,7 @@ export async function GET(req: NextRequest) {
         numeroRelance,
       });
 
-      // Mettre à jour le devis
-      await supabase
+      await admin
         .from("devis")
         .update({
           statut: "relance",
@@ -84,13 +89,9 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       erreurs.push(`devis ${devis_item.id}: ${msg}`);
-      console.error("Erreur relance:", msg);
+      console.error("[cron] relance error:", msg);
     }
   }
 
-  return NextResponse.json({
-    success: true,
-    relancesEnvoyees,
-    erreurs,
-  });
+  return NextResponse.json({ success: true, relancesEnvoyees, erreurs });
 }

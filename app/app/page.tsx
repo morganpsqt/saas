@@ -31,6 +31,7 @@ export default async function DashboardPage() {
           align-items: flex-end;
           justify-content: space-between;
           margin-bottom: 32px;
+          gap: 16px;
         }
         .page-title {
           font-family: 'Fraunces', serif;
@@ -62,7 +63,7 @@ export default async function DashboardPage() {
           <h1 className="page-title">Mes devis</h1>
           <p className="page-subtitle">Suivez et relancez vos clients automatiquement</p>
         </div>
-        <Link href="/devis/nouveau" className="add-btn">+ Ajouter un devis</Link>
+        <Link href="/app/devis/nouveau" className="add-btn">+ Ajouter un devis</Link>
       </div>
 
       <Stats total={total} gagnes={gagnes} montantGagne={montantGagne} tauxConversion={tauxConversion} />

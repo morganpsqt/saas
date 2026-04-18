@@ -1,9 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --relya-cream: #F7F5F2;
+    --relya-dark: #1C2B1A;
+    --relya-gold: #D2A050;
+    --relya-muted: #9A9A9A;
+  }
+
+  * { box-sizing: border-box; }
+
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    background: var(--relya-cream);
+    color: var(--relya-dark);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
   }
 }
