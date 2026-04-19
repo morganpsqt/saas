@@ -623,12 +623,12 @@ export default function LandingPage() {
 
             {/* témoignage fictif — à remplacer par un vrai */}
             <div className="lp-testimonial">
-              <div className="lp-avatar" aria-hidden>TR</div>
+              <div className="lp-avatar" aria-hidden>SR</div>
               <div className="lp-testimonial-quote">
                 On envoie 20 à 30 propositions par mois. Sans Relya, on perdait la
                 moitié des opportunités. C'est devenu indispensable chez nous.
               </div>
-              <div className="lp-testimonial-author">Thomas R.</div>
+              <div className="lp-testimonial-author">Samir R.</div>
               <div className="lp-testimonial-role">Fondateur d'une agence web, Paris</div>
               <div className="lp-testimonial-tag">exemple</div>
             </div>
