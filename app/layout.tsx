@@ -2,9 +2,23 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Relya — 3× plus de devis signés, sans y penser.",
+  title: "Relya — Relancez vos devis automatiquement",
   description:
-    "Relya relance automatiquement vos clients à J+2, J+5 et J+10. Plus jamais de devis oublié. Pensé pour les artisans.",
+    "Le logiciel de relance automatique pour artisans, freelances, agences et consultants. 3× plus de devis signés, sans y penser.",
+  openGraph: {
+    title: "Relya — Relancez vos devis automatiquement",
+    description:
+      "Le logiciel de relance automatique pour artisans, freelances, agences et consultants. 3× plus de devis signés, sans y penser.",
+    type: "website",
+    locale: "fr_FR",
+    siteName: "Relya",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Relya — Relancez vos devis automatiquement",
+    description:
+      "Le logiciel de relance automatique pour artisans, freelances, agences et consultants. 3× plus de devis signés, sans y penser.",
+  },
 };
 
 export default function RootLayout({
