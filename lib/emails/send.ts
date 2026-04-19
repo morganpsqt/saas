@@ -1,7 +1,15 @@
 import { Resend } from "resend";
 import { emailRelance1, emailRelance2, emailRelance3 } from "./templates";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (_resend) return _resend;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY manquante");
+  _resend = new Resend(key);
+  return _resend;
+}
+
 const FROM = process.env.RESEND_FROM ?? "Relya <onboarding@resend.dev>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -35,7 +43,7 @@ export async function sendRelanceEmail(params: SendRelanceParams) {
     appUrl: APP_URL,
   });
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to,
     subject: SUBJECTS[numeroRelance],
