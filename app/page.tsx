@@ -76,7 +76,7 @@ export default function LandingPage() {
           font-size: 18px;
           color: #4A4A4A;
           line-height: 1.55;
-          max-width: 620px;
+          max-width: 680px;
           margin: 0 auto 32px;
         }
         .lp-hero-ctas {
@@ -126,9 +126,71 @@ export default function LandingPage() {
         .lp-section-intro {
           text-align: center;
           color: #6B7280;
-          max-width: 600px;
+          max-width: 620px;
           margin: 0 auto 48px;
           line-height: 1.55;
+        }
+
+        /* ---------- Section "Pour qui ?" ---------- */
+        .lp-who {
+          background: #FAF6EE;
+          padding: 72px 24px;
+        }
+        .lp-who-inner {
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+        .lp-who-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+        .lp-who-card {
+          background: #fff;
+          border: 1px solid #ECEAE6;
+          border-radius: 16px;
+          padding: 28px 22px;
+          text-align: center;
+          transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+        .lp-who-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 28px rgba(28,43,26,.06);
+          border-color: #EFD9B1;
+        }
+        .lp-who-icon {
+          width: 52px;
+          height: 52px;
+          margin: 0 auto 18px;
+          background: #FAF6EE;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #D2A050;
+        }
+        .lp-who-card.alt .lp-who-icon {
+          background: #E9EFE5;
+          color: #1C2B1A;
+        }
+        .lp-who-icon svg {
+          width: 26px; height: 26px;
+          stroke: currentColor;
+          fill: none;
+          stroke-width: 1.8;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .lp-who-card h3 {
+          font-family: 'Fraunces', serif;
+          font-size: 19px;
+          color: #1C2B1A;
+          margin-bottom: 8px;
+        }
+        .lp-who-card p {
+          font-size: 13.5px;
+          color: #6B7280;
+          line-height: 1.5;
         }
 
         .lp-problem {
@@ -225,9 +287,28 @@ export default function LandingPage() {
           border-radius: 16px;
           padding: 28px;
         }
+        .lp-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: #D2A050;
+          color: #1C2B1A;
+          font-family: 'Fraunces', serif;
+          font-weight: 600;
+          font-size: 16px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 14px;
+          letter-spacing: 0.3px;
+        }
+        .lp-avatar.green {
+          background: #E9EFE5;
+          color: #1C2B1A;
+        }
         .lp-testimonial-quote {
           font-family: 'Fraunces', serif;
-          font-size: 18px;
+          font-size: 17px;
           color: #1C2B1A;
           line-height: 1.5;
           margin-bottom: 16px;
@@ -346,10 +427,14 @@ export default function LandingPage() {
         .lp-footer a { color: #6B7280; text-decoration: none; margin-right: 16px; }
         .lp-footer a:hover { color: #1C2B1A; }
 
+        @media (max-width: 980px) {
+          .lp-who-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (max-width: 640px) {
           .lp-h1 { font-size: 40px; }
           .lp-section-title { font-size: 28px; }
           .lp-final h2 { font-size: 30px; }
+          .lp-who-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -369,12 +454,14 @@ export default function LandingPage() {
         </header>
 
         <section className="lp-hero">
-          <div className="lp-tag">Pour artisans, plombiers, électriciens & indépendants</div>
+          <div className="lp-tag">Pour tous les pros qui envoient des devis</div>
           <h1 className="lp-h1">
-            3× plus de devis <em>signés</em>,<br />sans y penser.
+            3× plus de devis <em>signés</em>.<br />Sans y penser.
           </h1>
           <p className="lp-sub">
-            Relya relance automatiquement vos clients à J+2, J+5 et J+10 après l'envoi d'un devis. Vous gagnez des chantiers pendant que vous travaillez sur les vôtres.
+            Que vous soyez artisan, freelance, agence ou consultant, Relya relance
+            vos clients à votre place — pendant que vous travaillez sur ce qui
+            compte vraiment.
           </p>
           <div className="lp-hero-ctas">
             <Link href="/signup" className="lp-cta-big">Essayer gratuitement 14 jours →</Link>
@@ -385,23 +472,84 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ---------- Section "Pour qui ?" ---------- */}
+        <section className="lp-who">
+          <div className="lp-who-inner">
+            <h2 className="lp-section-title">Fait pour tous les pros qui envoient des devis</h2>
+            <p className="lp-section-intro">
+              Artisans, freelances, agences, indépendants — partout où un devis
+              attend une réponse, Relya relance à votre place.
+            </p>
+            <div className="lp-who-grid">
+              <div className="lp-who-card">
+                <div className="lp-who-icon" aria-hidden>
+                  {/* clé à molette stylisée */}
+                  <svg viewBox="0 0 24 24">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z" />
+                  </svg>
+                </div>
+                <h3>Artisans</h3>
+                <p>Plombiers, électriciens, peintres, menuisiers, maçons, chauffagistes…</p>
+              </div>
+
+              <div className="lp-who-card alt">
+                <div className="lp-who-icon" aria-hidden>
+                  {/* laptop */}
+                  <svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="12" rx="2" ry="2" />
+                    <line x1="2" y1="20" x2="22" y2="20" />
+                  </svg>
+                </div>
+                <h3>Freelances</h3>
+                <p>Graphistes, devs, rédacteurs, consultants, coachs, traducteurs…</p>
+              </div>
+
+              <div className="lp-who-card">
+                <div className="lp-who-icon" aria-hidden>
+                  {/* équipe — 3 personnages */}
+                  <svg viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <h3>Agences</h3>
+                <p>Com, marketing, web, événementiel, digital, design…</p>
+              </div>
+
+              <div className="lp-who-card alt">
+                <div className="lp-who-icon" aria-hidden>
+                  {/* étoile */}
+                  <svg viewBox="0 0 24 24">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </div>
+                <h3>Autres pros</h3>
+                <p>Photographes, architectes, experts, avocats, formateurs…</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="lp-problem">
           <h2 className="lp-section-title">Vos devis dorment. Vos clients hésitent.</h2>
           <p className="lp-section-intro">
-            70 % des devis signés le sont après une ou plusieurs relances. Mais relancer prend du temps, et c'est souvent la tâche qu'on repousse.
+            70 % des devis signés le sont après une ou plusieurs relances. Mais
+            relancer prend du temps — et c'est souvent la tâche qu'on repousse.
           </p>
           <div className="lp-problem-grid">
             <div className="lp-problem-card">
               <h3>Sans relance</h3>
-              <p>Le client oublie, part chez un concurrent ou repousse indéfiniment. Votre devis finit aux oubliettes.</p>
+              <p>Votre client oublie, part ailleurs, ou repousse indéfiniment. Votre proposition finit aux oubliettes.</p>
             </div>
             <div className="lp-problem-card">
               <h3>Relances manuelles</h3>
-              <p>Vous y pensez le dimanche soir, jamais le bon jour. Et finalement, vous n'envoyez rien.</p>
+              <p>Vous y pensez le dimanche soir, jamais au bon moment. Résultat : vous n'envoyez rien.</p>
             </div>
             <div className="lp-problem-card">
               <h3>Avec Relya</h3>
-              <p>Chaque devis est relancé automatiquement aux bons moments avec un ton professionnel. Vous ne faites rien.</p>
+              <p>Chaque devis est relancé automatiquement aux bons moments, avec un ton pro. Vous ne faites rien.</p>
             </div>
           </div>
         </section>
@@ -412,18 +560,18 @@ export default function LandingPage() {
           <div className="lp-steps">
             <div className="lp-step">
               <div className="lp-step-num">1</div>
-              <h3>Ajoutez votre devis</h3>
-              <p>Nom du client, email, montant, date d'envoi. 30 secondes chrono.</p>
+              <h3>Ajoutez vos devis</h3>
+              <p>Nom du client, email, montant, date d'envoi. 30 secondes par devis.</p>
             </div>
             <div className="lp-step">
               <div className="lp-step-num">2</div>
-              <h3>Relya prend le relais</h3>
-              <p>Vos clients reçoivent une relance à J+2, puis J+5, puis J+10. Vous ne touchez à rien.</p>
+              <h3>Les relances partent toutes seules</h3>
+              <p>Jour 2, jour 5, jour 10. Emails personnalisés, envoyés en votre nom. Vous ne touchez à rien.</p>
             </div>
             <div className="lp-step">
               <div className="lp-step-num">3</div>
-              <h3>Suivez les signatures</h3>
-              <p>Dès qu'un client répond ou signe, marquez le devis comme gagné. Vos stats se mettent à jour.</p>
+              <h3>Vous signez plus de contrats</h3>
+              <p>Suivez vos conversions dans votre tableau de bord. Notes, stats, export CSV.</p>
             </div>
           </div>
         </section>
@@ -446,31 +594,42 @@ export default function LandingPage() {
         </section>
 
         <section className="lp-section">
-          <h2 className="lp-section-title">Ce que disent les artisans</h2>
-          <p className="lp-section-intro">Des témoignages d'utilisateurs au quotidien.</p>
+          <h2 className="lp-section-title">Ce qu'en disent nos utilisateurs</h2>
+          <p className="lp-section-intro">Trois profils différents, un seul problème résolu.</p>
           <div className="lp-testimonials">
+            {/* témoignage fictif — à remplacer par un vrai */}
             <div className="lp-testimonial">
+              <div className="lp-avatar" aria-hidden>ML</div>
               <div className="lp-testimonial-quote">
-                « Je signe 2 devis de plus par semaine sans avoir à y penser. Le retour sur investissement a été immédiat. »
+                Depuis Relya, je signe 2 devis de plus par semaine sans me prendre la
+                tête. Je fais mon métier, Relya gère le reste.
               </div>
-              <div className="lp-testimonial-author">Julien M.</div>
+              <div className="lp-testimonial-author">Marc L.</div>
               <div className="lp-testimonial-role">Plombier, Lyon</div>
               <div className="lp-testimonial-tag">exemple</div>
             </div>
+
+            {/* témoignage fictif — à remplacer par un vrai */}
             <div className="lp-testimonial">
+              <div className="lp-avatar green" aria-hidden>SM</div>
               <div className="lp-testimonial-quote">
-                « J'avais 40 devis en attente. En 2 mois, j'en ai converti 14 grâce aux relances. Bluffant. »
+                J'oubliais toujours de relancer mes prospects. Maintenant c'est
+                automatique, et je vois mon CA grimper sans effort.
               </div>
-              <div className="lp-testimonial-author">Sophie L.</div>
-              <div className="lp-testimonial-role">Électricienne, Bordeaux</div>
+              <div className="lp-testimonial-author">Sophie M.</div>
+              <div className="lp-testimonial-role">Graphiste freelance, Nantes</div>
               <div className="lp-testimonial-tag">exemple</div>
             </div>
+
+            {/* témoignage fictif — à remplacer par un vrai */}
             <div className="lp-testimonial">
+              <div className="lp-avatar" aria-hidden>TR</div>
               <div className="lp-testimonial-quote">
-                « Avant, j'oubliais de relancer. Maintenant c'est Relya qui bosse, et moi je fais mes chantiers. »
+                On envoie 20 à 30 propositions par mois. Sans Relya, on perdait la
+                moitié des opportunités. C'est devenu indispensable chez nous.
               </div>
-              <div className="lp-testimonial-author">Karim B.</div>
-              <div className="lp-testimonial-role">Menuisier, Marseille</div>
+              <div className="lp-testimonial-author">Thomas R.</div>
+              <div className="lp-testimonial-role">Fondateur d'une agence web, Paris</div>
               <div className="lp-testimonial-tag">exemple</div>
             </div>
           </div>
@@ -496,7 +655,7 @@ export default function LandingPage() {
               <li>Devis illimités</li>
               <li>Relances automatiques J+2, J+5, J+10</li>
               <li>Emails personnalisés à votre nom</li>
-              <li>Dashboard avec vos statistiques</li>
+              <li>Tableau de bord avec vos statistiques</li>
               <li>Support par email</li>
             </ul>
             <Link href="/signup" className="lp-cta-big" style={{ display: "block" }}>
@@ -508,6 +667,18 @@ export default function LandingPage() {
         <section className="lp-section">
           <h2 className="lp-section-title">Questions fréquentes</h2>
           <div className="lp-faq-list">
+            <div className="lp-faq-item">
+              <div className="lp-faq-q">C'est pour quel type de pro ?</div>
+              <div className="lp-faq-a">
+                Pour toute personne qui envoie régulièrement des devis — artisans
+                (plombiers, électriciens, peintres, menuisiers…), freelances
+                (graphistes, devs, rédacteurs, consultants…), agences (com,
+                marketing, web, événementiel) et autres indépendants
+                (photographes, architectes, coachs, avocats…). Tant que vous
+                envoyez des devis, Relya vous fait gagner du temps et des
+                signatures.
+              </div>
+            </div>
             <div className="lp-faq-item">
               <div className="lp-faq-q">Comment fonctionne l'essai gratuit ?</div>
               <div className="lp-faq-a">Vous avez 14 jours pour tester Relya gratuitement, sans saisir de carte bancaire. À la fin de l'essai, vous activez votre abonnement ou vous arrêtez, sans frais.</div>
