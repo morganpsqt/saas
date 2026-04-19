@@ -115,11 +115,13 @@ J'ai utilisé des cercles colorés avec initiales plutôt que des vraies photos 
 Le fix lazy-init de Resend est une amélioration pré-existante (rien à voir avec V3) mais c'était nécessaire pour que `npm run build` passe localement sans RESEND_API_KEY. Sur Vercel le problème n'apparaissait pas car les env vars sont injectées au build.
 
 ### Pas de PR ouverte automatiquement
-J'ai commité + poussé sur la branche `claude/quizzical-napier-20ef1c`. **La branche attend que tu ouvres la PR toi-même**. L'URL est affichée dans la sortie du dernier push, ou via :
-```bash
-gh pr create --title "V3 — Élargir le positionnement de Relya" --body "..."
-```
-Vu qu'on est en worktree sur une branche d'agent, j'ai jugé plus propre de ne pas créer la PR moi-même et de te laisser la relire. Si tu veux que je la crée, dis-moi.
+J'ai commité + poussé sur la branche `claude/quizzical-napier-20ef1c`. **La branche attend que tu ouvres la PR toi-même** :
+
+👉 **https://github.com/morganpsqt/saas/pull/new/claude/quizzical-napier-20ef1c**
+
+(Cliquer sur ce lien → GitHub ouvre automatiquement le formulaire "New pull request" pré-rempli vers `main`. Titre suggéré : *"V3 — Élargir le positionnement de Relya à tous les pros"*. Corps : tu peux copier-coller les sections 1 à 4 de ce handoff.)
+
+J'ai tenté `gh pr create` en ligne de commande, mais `gh` n'est pas installé sur cette machine. J'ai tranché pour le lien web plutôt que d'installer `gh` à la volée (hors scope).
 
 ---
 
