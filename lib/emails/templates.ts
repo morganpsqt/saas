@@ -41,7 +41,7 @@ function baseLayout(content: string) {
     <span class="brand-name">Relya</span>
   </div>
   <div class="body">${content}</div>
-  <div class="footer">Envoyé via <a href="https://relya.fr">Relya</a> — Relances automatiques pour artisans.</div>
+  <div class="footer">Envoyé via <a href="https://relya.fr">Relya</a> — Relances automatiques de devis.</div>
 </div>
 </body>
 </html>`;
@@ -50,8 +50,7 @@ function baseLayout(content: string) {
 function signature(artisanEmail: string) {
   return `
 <div class="signature">
-  <p style="margin:0 0 6px;"><strong style="color:#1C2B1A;">Votre artisan</strong></p>
-  <p style="margin:0;"><a href="mailto:${artisanEmail}">${artisanEmail}</a></p>
+  <p style="margin:0;">Pour toute question, répondez directement à : <a href="mailto:${artisanEmail}">${artisanEmail}</a></p>
 </div>`;
 }
 

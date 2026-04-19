@@ -335,7 +335,7 @@ export default function LoginPage() {
         <div className="login-right">
           <div className="login-card">
             <h1 className="login-title">Bon retour 👋</h1>
-            <p className="login-subtitle">Connectez-vous à votre espace artisan</p>
+            <p className="login-subtitle">Connectez-vous à votre compte</p>
 
             <div className="form-group">
               <label className="form-label">Email</label>
