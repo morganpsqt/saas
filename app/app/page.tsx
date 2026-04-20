@@ -1,16 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import Stats from "@/components/dashboard/Stats";
-import DevisTable from "@/components/devis/DevisTable";
+import DevisTableContainer from "@/components/devis/DevisTableContainer";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import RevenueChart from "@/components/dashboard/RevenueChart";
-import ExportCsvButton from "@/components/devis/ExportCsvButton";
 import DashboardGreeting from "@/components/dashboard/DashboardGreeting";
+import DashboardShortcuts from "@/components/dashboard/DashboardShortcuts";
 import TipOfTheDay from "@/components/dashboard/TipOfTheDay";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import { getOrCreateSubscription } from "@/lib/subscriptions";
 import { getSubscriptionState, isPro as isProFn } from "@/lib/subscriptions-shared";
 import type { Devis } from "@/lib/types";
+import type { Profile } from "@/lib/profiles";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -27,6 +27,13 @@ export default async function DashboardPage() {
   const subscription = await getOrCreateSubscription(user!.id);
   const state = getSubscriptionState(subscription);
   const pro = isProFn(state);
+
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("user_id", user!.id)
+    .maybeSingle();
+  const profile = (profileRow as Pick<Profile, "display_name"> | null) ?? null;
 
   const total = list.length;
   const gagnes = list.filter((d) => d.statut === "gagne").length;
@@ -56,20 +63,6 @@ export default async function DashboardPage() {
           font-size: 14px;
           color: #9A9A9A;
         }
-        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .add-btn {
-          background: #1C2B1A;
-          color: #F7F5F2;
-          padding: 11px 20px;
-          border-radius: 10px;
-          font-size: 14px;
-          font-weight: 500;
-          text-decoration: none;
-          font-family: 'DM Sans', sans-serif;
-          transition: background 0.2s;
-          white-space: nowrap;
-        }
-        .add-btn:hover { background: #2C3F2A; }
         .section-title {
           font-family: 'Fraunces', serif;
           font-size: 20px;
@@ -77,15 +70,12 @@ export default async function DashboardPage() {
           margin: 28px 0 14px;
         }
       `}</style>
+      <DashboardShortcuts isPro={pro} devisJson={JSON.stringify(list)} />
       <div className="page-header">
         <div>
-          <DashboardGreeting email={user!.email ?? ""} />
+          <DashboardGreeting email={user!.email ?? ""} displayName={profile?.display_name ?? null} />
           <h1 className="page-title">Mes devis</h1>
           <p className="page-subtitle">Suivez et relancez vos clients automatiquement</p>
-        </div>
-        <div className="header-actions">
-          <ExportCsvButton devis={list} isPro={pro} />
-          <Link href="/app/devis/nouveau" className="add-btn">+ Ajouter un devis</Link>
         </div>
       </div>
 
@@ -96,8 +86,7 @@ export default async function DashboardPage() {
       <h2 className="section-title">Évolution du chiffre d&apos;affaires</h2>
       <RevenueChart devis={list} isPro={pro} />
 
-      <h2 className="section-title">Mes devis</h2>
-      <DevisTable devis={list} isPro={pro} />
+      <DevisTableContainer devis={list} isPro={pro} />
 
       <ActivityFeed devis={list} />
 
