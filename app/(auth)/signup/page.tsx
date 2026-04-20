@@ -29,6 +29,8 @@ export default function SignupPage() {
     // Si auto-confirm activé (dev) ou si session immédiate → redirige vers /app
     // Sinon (email confirmation requise) → message d'info
     if (data.session) {
+      // Envoi de l'email de bienvenue (non bloquant)
+      fetch("/api/auth/welcome", { method: "POST" }).catch(() => {});
       router.push("/app");
       router.refresh();
     } else {

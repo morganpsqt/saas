@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
+import UserMenu from "@/components/UserMenu";
 import TrialBanner from "@/components/TrialBanner";
 import ToastListener from "@/components/ToastListener";
+import OnboardingWizard from "@/components/OnboardingWizard";
 import { getOrCreateSubscription, hasActiveAccess } from "@/lib/subscriptions";
+import type { Profile } from "@/lib/profiles";
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +23,13 @@ export default async function DashboardLayout({
   if (!hasActiveAccess(subscription)) {
     redirect("/subscribe");
   }
+
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const profile = (profileRow as Profile | null) ?? null;
 
   return (
     <>
@@ -53,10 +62,6 @@ export default async function DashboardLayout({
           align-items: center;
           gap: 16px;
         }
-        .dash-nav-email {
-          font-size: 13px;
-          color: rgba(247,245,242,0.45);
-        }
         .dash-main {
           max-width: 1100px;
           margin: 0 auto;
@@ -64,7 +69,6 @@ export default async function DashboardLayout({
         }
         @media (max-width: 640px) {
           .dash-nav { padding: 0 20px; }
-          .dash-nav-email { display: none; }
           .dash-main { padding: 24px 20px; }
         }
       `}</style>
@@ -75,13 +79,19 @@ export default async function DashboardLayout({
             Relya
           </Link>
           <div className="dash-nav-right">
-            <span className="dash-nav-email">{user.email}</span>
-            <LogoutButton />
+            <UserMenu
+              email={user.email ?? ""}
+              avatarUrl={profile?.avatar_url ?? null}
+              displayName={profile?.display_name ?? null}
+            />
           </div>
         </nav>
         <TrialBanner subscription={subscription} />
         <main className="dash-main">{children}</main>
         <ToastListener />
+        {!profile?.has_seen_onboarding && (
+          <OnboardingWizard hasProfile={!!profile?.display_name} />
+        )}
       </div>
     </>
   );
