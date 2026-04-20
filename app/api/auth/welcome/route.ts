@@ -18,28 +18,32 @@ export async function POST() {
     return NextResponse.json({ skipped: true });
   }
 
+  let sent = false;
+  let sendError: string | null = null;
   try {
     await sendWelcomeEmail({
       to: user.email,
       displayName: profile?.display_name ?? undefined,
     });
+    sent = true;
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[welcome email] send failed:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    sendError = e instanceof Error ? e.message : String(e);
+    console.error("[welcome email] send failed:", sendError);
   }
 
-  // Marque comme envoyé via admin (la ligne peut ne pas encore exister)
-  try {
-    const admin = createAdminClient();
-    await admin.from("profiles").upsert({
-      user_id: user.id,
-      welcome_email_sent: true,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
-  } catch (e) {
-    console.warn("[welcome email] flag update failed:", e);
+  // Flag the profile as welcomed only on successful send so we retry later if Resend was down.
+  if (sent) {
+    try {
+      const admin = createAdminClient();
+      await admin.from("profiles").upsert({
+        user_id: user.id,
+        welcome_email_sent: true,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+    } catch (e) {
+      console.warn("[welcome email] flag update failed:", e);
+    }
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, sent, ...(sendError ? { reason: sendError } : {}) });
 }
