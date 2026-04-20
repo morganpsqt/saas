@@ -8,7 +8,7 @@ function pickGreeting() {
   return "Bonsoir";
 }
 
-function extractName(email: string): string {
+function extractNameFromEmail(email: string): string {
   if (!email) return "";
   const local = email.split("@")[0] ?? "";
   const first = local.split(/[._+-]/)[0] ?? "";
@@ -16,8 +16,8 @@ function extractName(email: string): string {
   return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
 }
 
-export default function DashboardGreeting({ email }: { email: string }) {
-  const name = extractName(email);
+export default function DashboardGreeting({ email, displayName }: { email: string; displayName?: string | null }) {
+  const name = displayName?.trim() || extractNameFromEmail(email);
   const greeting = pickGreeting();
   return (
     <>
