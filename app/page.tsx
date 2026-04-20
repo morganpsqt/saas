@@ -1,4 +1,7 @@
 import Link from "next/link";
+import ScrollReveal from "@/components/landing/ScrollReveal";
+import AnimatedCounter from "@/components/landing/AnimatedCounter";
+import DashboardMockup from "@/components/landing/DashboardMockup";
 
 export default function LandingPage() {
   return (
@@ -46,10 +49,19 @@ export default function LandingPage() {
         .lp-cta-primary:hover { background: #2C3F2A; }
 
         .lp-hero {
-          max-width: 860px;
+          max-width: 1100px;
           margin: 0 auto;
           padding: 80px 24px 60px;
-          text-align: center;
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          gap: 48px;
+          align-items: center;
+        }
+        .lp-hero-content { text-align: left; }
+        @media (max-width: 960px) {
+          .lp-hero { grid-template-columns: 1fr; max-width: 860px; text-align: center; }
+          .lp-hero-content { text-align: center; }
+          .lp-hero .lp-sub, .lp-hero .lp-hero-ctas { margin-left: auto; margin-right: auto; }
         }
         .lp-tag {
           display: inline-block;
@@ -77,12 +89,11 @@ export default function LandingPage() {
           color: #4A4A4A;
           line-height: 1.55;
           max-width: 620px;
-          margin: 0 auto 32px;
+          margin: 0 0 32px;
         }
         .lp-hero-ctas {
           display: flex;
           gap: 12px;
-          justify-content: center;
           flex-wrap: wrap;
           margin-bottom: 16px;
         }
@@ -369,84 +380,100 @@ export default function LandingPage() {
         </header>
 
         <section className="lp-hero">
-          <div className="lp-tag">Pour artisans, plombiers, électriciens & indépendants</div>
-          <h1 className="lp-h1">
-            3× plus de devis <em>signés</em>,<br />sans y penser.
-          </h1>
-          <p className="lp-sub">
-            Relya relance automatiquement vos clients à J+2, J+5 et J+10 après l'envoi d'un devis. Vous gagnez des chantiers pendant que vous travaillez sur les vôtres.
-          </p>
-          <div className="lp-hero-ctas">
-            <Link href="/signup" className="lp-cta-big">Essayer gratuitement 14 jours →</Link>
-            <Link href="/pricing" className="lp-cta-ghost">Voir les tarifs</Link>
+          <div className="lp-hero-content">
+            <div className="lp-tag">Pour artisans, plombiers, électriciens & indépendants</div>
+            <h1 className="lp-h1">
+              3× plus de devis <em>signés</em>,<br />sans y penser.
+            </h1>
+            <p className="lp-sub">
+              Relya relance automatiquement vos clients à J+2, J+5 et J+10 après l'envoi d'un devis. Vous gagnez des chantiers pendant que vous travaillez sur les vôtres.
+            </p>
+            <div className="lp-hero-ctas">
+              <Link href="/signup" className="lp-cta-big">Essayer gratuitement 14 jours →</Link>
+              <Link href="/pricing" className="lp-cta-ghost">Voir les tarifs</Link>
+            </div>
+            <div className="lp-hero-meta">
+              Aucune carte bancaire requise • Configuration en 2 minutes
+            </div>
           </div>
-          <div className="lp-hero-meta">
-            Aucune carte bancaire requise • Configuration en 2 minutes
-          </div>
+          <DashboardMockup />
         </section>
 
-        <section className="lp-problem">
-          <h2 className="lp-section-title">Vos devis dorment. Vos clients hésitent.</h2>
-          <p className="lp-section-intro">
-            70 % des devis signés le sont après une ou plusieurs relances. Mais relancer prend du temps, et c'est souvent la tâche qu'on repousse.
-          </p>
-          <div className="lp-problem-grid">
-            <div className="lp-problem-card">
-              <h3>Sans relance</h3>
-              <p>Le client oublie, part chez un concurrent ou repousse indéfiniment. Votre devis finit aux oubliettes.</p>
+        <ScrollReveal>
+          <section className="lp-problem">
+            <h2 className="lp-section-title">Vos devis dorment. Vos clients hésitent.</h2>
+            <p className="lp-section-intro">
+              70 % des devis signés le sont après une ou plusieurs relances. Mais relancer prend du temps, et c'est souvent la tâche qu'on repousse.
+            </p>
+            <div className="lp-problem-grid">
+              <div className="lp-problem-card">
+                <h3>Sans relance</h3>
+                <p>Le client oublie, part chez un concurrent ou repousse indéfiniment. Votre devis finit aux oubliettes.</p>
+              </div>
+              <div className="lp-problem-card">
+                <h3>Relances manuelles</h3>
+                <p>Vous y pensez le dimanche soir, jamais le bon jour. Et finalement, vous n'envoyez rien.</p>
+              </div>
+              <div className="lp-problem-card">
+                <h3>Avec Relya</h3>
+                <p>Chaque devis est relancé automatiquement aux bons moments avec un ton professionnel. Vous ne faites rien.</p>
+              </div>
             </div>
-            <div className="lp-problem-card">
-              <h3>Relances manuelles</h3>
-              <p>Vous y pensez le dimanche soir, jamais le bon jour. Et finalement, vous n'envoyez rien.</p>
-            </div>
-            <div className="lp-problem-card">
-              <h3>Avec Relya</h3>
-              <p>Chaque devis est relancé automatiquement aux bons moments avec un ton professionnel. Vous ne faites rien.</p>
-            </div>
-          </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
-        <section className="lp-section">
-          <h2 className="lp-section-title">Comment ça marche</h2>
-          <p className="lp-section-intro">En 3 étapes, vous ne ratez plus aucun devis.</p>
-          <div className="lp-steps">
-            <div className="lp-step">
-              <div className="lp-step-num">1</div>
-              <h3>Ajoutez votre devis</h3>
-              <p>Nom du client, email, montant, date d'envoi. 30 secondes chrono.</p>
+        <ScrollReveal>
+          <section className="lp-section">
+            <h2 className="lp-section-title">Comment ça marche</h2>
+            <p className="lp-section-intro">En 3 étapes, vous ne ratez plus aucun devis.</p>
+            <div className="lp-steps">
+              <div className="lp-step">
+                <div className="lp-step-num">1</div>
+                <h3>Ajoutez votre devis</h3>
+                <p>Nom du client, email, montant, date d'envoi. 30 secondes chrono.</p>
+              </div>
+              <div className="lp-step">
+                <div className="lp-step-num">2</div>
+                <h3>Relya prend le relais</h3>
+                <p>Vos clients reçoivent une relance à J+2, puis J+5, puis J+10. Vous ne touchez à rien.</p>
+              </div>
+              <div className="lp-step">
+                <div className="lp-step-num">3</div>
+                <h3>Suivez les signatures</h3>
+                <p>Dès qu'un client répond ou signe, marquez le devis comme gagné. Vos stats se mettent à jour.</p>
+              </div>
             </div>
-            <div className="lp-step">
-              <div className="lp-step-num">2</div>
-              <h3>Relya prend le relais</h3>
-              <p>Vos clients reçoivent une relance à J+2, puis J+5, puis J+10. Vous ne touchez à rien.</p>
-            </div>
-            <div className="lp-step">
-              <div className="lp-step-num">3</div>
-              <h3>Suivez les signatures</h3>
-              <p>Dès qu'un client répond ou signe, marquez le devis comme gagné. Vos stats se mettent à jour.</p>
-            </div>
-          </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
-        <section className="lp-stats">
-          <div className="lp-stats-grid">
-            <div>
-              <div className="lp-stat-num">3×</div>
-              <div className="lp-stat-label">Plus de devis signés en moyenne</div>
+        <ScrollReveal>
+          <section className="lp-stats">
+            <div className="lp-stats-grid">
+              <div>
+                <div className="lp-stat-num">
+                  <AnimatedCounter target={3} suffix="×" />
+                </div>
+                <div className="lp-stat-label">Plus de devis signés en moyenne</div>
+              </div>
+              <div>
+                <div className="lp-stat-num">
+                  <AnimatedCounter target={0} suffix=" min" />
+                </div>
+                <div className="lp-stat-label">Passées à relancer chaque semaine</div>
+              </div>
+              <div>
+                <div className="lp-stat-num">
+                  <AnimatedCounter target={2} suffix=" min" />
+                </div>
+                <div className="lp-stat-label">Pour configurer votre compte</div>
+              </div>
             </div>
-            <div>
-              <div className="lp-stat-num">0 min</div>
-              <div className="lp-stat-label">Passées à relancer chaque semaine</div>
-            </div>
-            <div>
-              <div className="lp-stat-num">2 min</div>
-              <div className="lp-stat-label">Pour configurer votre compte</div>
-            </div>
-          </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
-        <section className="lp-section">
-          <h2 className="lp-section-title">Ce que disent les artisans</h2>
+        <ScrollReveal>
+          <section className="lp-section">
+            <h2 className="lp-section-title">Ce que disent les artisans</h2>
           <p className="lp-section-intro">Des témoignages d'utilisateurs au quotidien.</p>
           <div className="lp-testimonials">
             <div className="lp-testimonial">
@@ -474,8 +501,10 @@ export default function LandingPage() {
               <div className="lp-testimonial-tag">exemple</div>
             </div>
           </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
+        <ScrollReveal>
         <section className="lp-section" id="pricing">
           <h2 className="lp-section-title">Un tarif simple</h2>
           <p className="lp-section-intro">Pas d'engagement. Résiliable à tout moment.</p>
@@ -504,7 +533,9 @@ export default function LandingPage() {
             </Link>
           </div>
         </section>
+        </ScrollReveal>
 
+        <ScrollReveal>
         <section className="lp-section">
           <h2 className="lp-section-title">Questions fréquentes</h2>
           <div className="lp-faq-list">
@@ -530,6 +561,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         <section className="lp-final">
           <h2>Laissez Relya travailler pour vous.</h2>
