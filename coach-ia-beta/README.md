@@ -1,20 +1,24 @@
 # Maya — coach fitness & nutrition IA (beta locale)
 
-App Expo (iOS + Android + Web) qui tourne **100% en local** :
+App Expo (iOS + Android + Web) qui tourne **100 % en local** :
 - dossier médical + nutrition + training collecté à l'onboarding (SQLite),
 - chat coach alimenté par **Gemini 2.5 Flash** — OU par un **mock réaliste** si aucune
-  clé API n'est fournie (tu peux tout tester sans rien payer).
+  clé API n'est fournie,
+- bibliothèques d'exercices (wger) et de recettes (TheMealDB) gratuites,
+- mini-encyclopédie de 18 articles rédigés localement,
+- tracking quotidien (eau, sommeil, énergie, poids),
+- chat contextuel depuis n'importe où (bouton « Demander à Maya »).
 
 ## Lancer l'app
 
 ```bash
 cd coach-ia-beta
 npm install --legacy-peer-deps
-npx expo start --web    # ou --ios / --android, ou scanner le QR code avec Expo Go
+npx expo start --web    # ou --ios / --android / scan QR avec Expo Go
 ```
 
-À la première ouverture : onboarding 5 étapes → chat avec Maya.
-Un bandeau **« Mode démo (sans API) »** apparaît tant que la clé Gemini n'est pas définie.
+À la première ouverture : onboarding 5 étapes → dashboard. Un bandeau **« Mode démo
+(sans API) »** apparaît dans le chat tant que la clé Gemini n'est pas définie.
 
 ## Activer Gemini (quand tu as ta clé)
 
@@ -34,54 +38,69 @@ détecte automatiquement la clé et bascule du mock vers Gemini.
 ## Tester sur téléphone
 
 1. Installe **Expo Go** sur ton téléphone (App Store / Play Store).
-2. `npx expo start` → un QR code s'affiche dans le terminal.
-3. Scanne-le (appareil photo iOS, ou depuis Expo Go sur Android).
+2. `npx expo start` → un QR code s'affiche.
+3. Scanne-le. L'app et ton téléphone doivent être sur le même Wi-Fi.
 
-L'app et ton téléphone doivent être sur le même réseau Wi-Fi.
+## Navigation
+
+L'app a **6 onglets** :
+
+- **🏠 Accueil** : greeting, tip du jour (rotation sur 30 tips), tracker habitudes
+  (eau/sommeil/énergie/poids), actions rapides, 1 exo + 1 recette random du jour,
+  bloc progression.
+- **💬 Maya** : chat coach, bandeau mode démo, supporte `prefill` via query param.
+- **🏋️ Exercices** : bibliothèque wger, recherche + filtres (groupe musculaire,
+  équipement), grille 2 cols, lazy-load 20 par 20, favoris ❤️.
+- **🍽️ Recettes** : bibliothèque TheMealDB, recherche + catégories, favoris ❤️.
+- **📚 Savoir** : 18 articles classés en 5 catégories (corps, nutrition, training,
+  lifestyle, mindset), barre de progression, marquage « Lu ».
+- **👤 Profil** : dossier médical visible, statut mode IA, vider cache API,
+  reset DB.
 
 ## Structure
 
 ```
 coach-ia-beta/
-├── app/                   # Expo Router (file-based)
-│   ├── (onboarding)/      # 5 écrans : identité → medical → nutrition → training → goals
-│   ├── (main)/            # chat.tsx, profile.tsx
-│   └── _layout.tsx, index.tsx
+├── app/
+│   ├── (onboarding)/          # 5 étapes
+│   ├── (tabs)/                # 6 onglets
+│   ├── exercise/[id].tsx      # détail exercice
+│   ├── recipe/[id].tsx        # détail recette
+│   └── knowledge/[slug].tsx   # détail article
 ├── lib/
-│   ├── db/                # schema.ts (SQLite init) + queries.ts
-│   ├── ai/                # gemini.ts (wrapper + fallback mock),
-│   │                       mock.ts, system-prompt.ts,
-│   │                       red-flags.ts, context-builder.ts
-│   └── store/             # user-store.ts (Zustand)
-├── components/            # ChatBubble, FormField, OnboardingStep
-├── .env.example           # copie en .env.local + ajoute ta clé Gemini
+│   ├── ai/                    # gemini.ts + mock.ts + system-prompt + red-flags
+│   ├── api/                   # cache.ts (SQLite) + wger.ts + themealdb.ts
+│   ├── content/               # knowledge-articles.ts + daily-tips.ts
+│   ├── db/                    # schema.ts + queries.ts + queries-v2.ts
+│   └── store/                 # Zustand user-store
+├── components/
+│   ├── Cards/                 # ExerciseCard, RecipeCard, KnowledgeCard
+│   ├── Dashboard/             # DailyTipCard, HabitsTracker, QuickActions
+│   └── Common/                # FilterChips, Skeleton
 └── package.json
 ```
 
-## Ce que fait Maya (règles de sécurité)
+## Règles de sécurité (toujours actives)
 
-Déjà câblées dans le system prompt + le mock :
-
-- **TCA** (anorexie, boulimie, purge, mots-clés de dégoût de soi) → stop coaching de sèche,
-  réponse empathique + numéro d'aide (0 810 037 037 en France).
-- **Perte > 1% du poids/semaine** → refus motivé, propose 0,5–0,75 %/semaine.
-- **Mineur + objectif de restriction** → refus du déficit.
+- **TCA** (anorexie, boulimie, purge, mots-clés de dégoût) → stop coaching de sèche,
+  numéro d'aide (0 810 037 037 en France).
+- **Perte > 1 % du poids/sem** → refus motivé, propose 0,5–0,75 %/sem.
+- **Mineur + objectif restriction** → refus du déficit.
 - **Grossesse / allaitement** → aucun déficit.
-- **Médicaments sensibles** (corticoïdes, chimio, antipsychotiques majeurs) → flaggé,
-  injecté dans le contexte.
+- **Médicaments sensibles** → flag injecté dans le contexte.
 
-Les red flags sont calculés à la fin de l'onboarding, stockés en JSON dans
-`medical_profile.red_flags`, puis ré-injectés dans le contexte de chaque conversation.
+Red flags calculés à la fin de l'onboarding → stockés en JSON dans `medical_profile.red_flags` → ré-injectés à chaque conversation.
+
+## APIs externes utilisées (gratuites, sans clé)
+
+- **wger** — `https://wger.de/api/v2/` pour les exercices + images.
+- **TheMealDB** — `https://www.themealdb.com/api/json/v1/1/` pour les recettes.
+- **Picsum** — placeholder images si image manquante.
+
+Toutes les réponses sont cachées dans SQLite (`api_cache`) : 24 h pour les listes,
+7 jours pour les détails. Le bouton « Vider le cache API » dans Profil force un
+rechargement.
 
 ## Réinitialiser la DB
 
-Dans l'écran **Profil** (lien en haut à droite du chat) → bouton
-**« Réinitialiser la DB »** (rouge, en bas). Efface tout : profil, messages, objectifs.
-
-## Notes techniques
-
-- SQLite local via `expo-sqlite` (version web = WASM, version native = natif).
-- Zustand pour l'état draft de l'onboarding.
-- NativeWind (Tailwind) pour le styling cross-platform.
-- Le wrapper IA (`lib/ai/gemini.ts`) lazy-load le SDK `@google/genai` seulement
-  quand une clé est fournie, donc le mock reste ultra-léger.
+Profil → « Réinitialiser la DB ». Efface profil, messages, favoris, tracking, articles lus, cache API.

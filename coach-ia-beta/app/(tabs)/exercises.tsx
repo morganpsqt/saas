@@ -19,6 +19,7 @@ import {
 } from '../../lib/api/wger';
 import { ExerciseCard } from '../../components/Cards/ExerciseCard';
 import { FilterChips } from '../../components/Common/FilterChips';
+import { SkeletonGrid2 } from '../../components/Common/Skeleton';
 import { useUserStore } from '../../lib/store/user-store';
 import {
   addFavoriteExercise,
@@ -143,7 +144,9 @@ export default function ExercisesTab() {
         />
       </View>
 
-      {error && items.length === 0 ? (
+      {loading && items.length === 0 ? (
+        <SkeletonGrid2 count={6} />
+      ) : error && items.length === 0 ? (
         <View className="flex-1 items-center justify-center px-8">
           <Ionicons name="cloud-offline-outline" size={40} color="#78716c" />
           <Text className="text-maya-muted mt-2 text-center">
