@@ -79,6 +79,54 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_messages_user_created ON messages(user_id, created_at);
+
+-- Phase 2 ---------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS daily_habits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES profiles(id),
+  log_date TEXT NOT NULL,
+  water_ml INTEGER DEFAULT 0,
+  sleep_hours REAL,
+  mood_1_10 INTEGER,
+  energy_1_10 INTEGER,
+  weight_kg REAL,
+  notes TEXT,
+  UNIQUE(user_id, log_date)
+);
+CREATE INDEX IF NOT EXISTS idx_habits_user_date ON daily_habits(user_id, log_date);
+
+CREATE TABLE IF NOT EXISTS favorite_exercises (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES profiles(id),
+  exercise_api_id TEXT NOT NULL,
+  exercise_name TEXT,
+  added_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, exercise_api_id)
+);
+
+CREATE TABLE IF NOT EXISTS favorite_recipes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES profiles(id),
+  recipe_api_id TEXT NOT NULL,
+  recipe_name TEXT,
+  added_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, recipe_api_id)
+);
+
+CREATE TABLE IF NOT EXISTS read_articles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER REFERENCES profiles(id),
+  article_slug TEXT NOT NULL,
+  read_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, article_slug)
+);
+
+CREATE TABLE IF NOT EXISTS api_cache (
+  cache_key TEXT PRIMARY KEY,
+  content TEXT NOT NULL,
+  fetched_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
 `;
 
 export async function initDatabase(): Promise<void> {
@@ -89,6 +137,11 @@ export async function initDatabase(): Promise<void> {
 export async function resetDatabase(): Promise<void> {
   const db = await getDb();
   await db.execAsync(`
+    DROP TABLE IF EXISTS read_articles;
+    DROP TABLE IF EXISTS favorite_recipes;
+    DROP TABLE IF EXISTS favorite_exercises;
+    DROP TABLE IF EXISTS daily_habits;
+    DROP TABLE IF EXISTS api_cache;
     DROP TABLE IF EXISTS messages;
     DROP TABLE IF EXISTS goals;
     DROP TABLE IF EXISTS training_profile;
