@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
+    "@expo/vector-icons": "^15.1.1",
     "@google/genai": "^1.50.1",
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",
+    "expo-image": "~3.0.11",
     "expo-linking": "~8.0.11",
     "expo-router": "~6.0.23",
     "expo-sqlite": "~16.0.10",

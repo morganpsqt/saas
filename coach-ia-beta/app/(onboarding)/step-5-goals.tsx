@@ -96,7 +96,7 @@ export default function Step5Goals() {
 
       setUserId(userId);
       resetDraft();
-      router.replace('/(main)/chat');
+      router.replace('/(tabs)');
     } catch (e: any) {
       Alert.alert('Erreur', String(e?.message ?? e));
       setSaving(false);

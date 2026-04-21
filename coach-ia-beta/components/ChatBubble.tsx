@@ -23,7 +23,7 @@ export function ChatBubble({ role, content }: Props) {
           <Text className="text-maya-accent text-xs font-semibold mb-1">Maya</Text>
         ) : null}
         <Text
-          className={`text-base ${isUser ? 'text-black' : 'text-maya-text'}`}
+          className={`text-base ${isUser ? 'text-white' : 'text-maya-text'}`}
         >
           {content}
         </Text>

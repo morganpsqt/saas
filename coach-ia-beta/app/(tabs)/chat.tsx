@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useNavigation } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { ChatBubble } from '../../components/ChatBubble';
 import { useUserStore } from '../../lib/store/user-store';
 import {
@@ -23,21 +23,12 @@ import { sendMessage, isMockMode } from '../../lib/ai/gemini';
 
 export default function ChatScreen() {
   const userId = useUserStore((s) => s.userId);
-  const nav = useNavigation();
+  const params = useLocalSearchParams<{ prefill?: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList<Message>>(null);
-
-  useEffect(() => {
-    nav.setOptions({
-      headerRight: () => (
-        <Pressable onPress={() => router.push('/(main)/profile')} className="pr-3">
-          <Text className="text-maya-accent font-medium">Profil</Text>
-        </Pressable>
-      ),
-    });
-  }, [nav]);
+  const appliedPrefillRef = useRef<string | null>(null);
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -48,6 +39,14 @@ export default function ChatScreen() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    const pf = typeof params.prefill === 'string' ? params.prefill : null;
+    if (pf && appliedPrefillRef.current !== pf) {
+      appliedPrefillRef.current = pf;
+      setInput(pf);
+    }
+  }, [params.prefill]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -104,8 +103,8 @@ export default function ChatScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         {isMockMode ? (
-          <View className="bg-maya-panel border-b border-maya-border px-4 py-2">
-            <Text className="text-maya-accent text-xs text-center">
+          <View className="bg-maya-accentSoft border-b border-maya-border px-4 py-2">
+            <Text className="text-maya-accentDark text-xs text-center font-medium">
               Mode démo (sans API) — les réponses sont simulées
             </Text>
           </View>
@@ -131,16 +130,16 @@ export default function ChatScreen() {
 
         {sending ? (
           <View className="flex-row items-center gap-2 px-6 pb-2">
-            <ActivityIndicator color="#22D3EE" size="small" />
+            <ActivityIndicator color="#10b981" size="small" />
             <Text className="text-maya-muted text-sm">Maya écrit…</Text>
           </View>
         ) : null}
 
-        <View className="flex-row items-end gap-2 px-4 py-3 border-t border-maya-border bg-maya-bg">
+        <View className="flex-row items-end gap-2 px-4 py-3 border-t border-maya-border bg-maya-panel">
           <TextInput
-            className="flex-1 bg-maya-panel border border-maya-border rounded-2xl px-4 py-3 text-maya-text max-h-32"
+            className="flex-1 bg-maya-bg border border-maya-border rounded-2xl px-4 py-3 text-maya-text max-h-32"
             placeholder="Écris à Maya…"
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="#a8a29e"
             value={input}
             onChangeText={setInput}
             multiline
@@ -155,7 +154,7 @@ export default function ChatScreen() {
           >
             <Text
               className={`font-semibold ${
-                !input.trim() || sending ? 'text-maya-muted' : 'text-black'
+                !input.trim() || sending ? 'text-maya-muted' : 'text-white'
               }`}
             >
               Envoyer

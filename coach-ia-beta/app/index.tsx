@@ -12,7 +12,7 @@ export default function Index() {
       const profile = await getFirstProfile();
       if (profile) {
         setUserId(profile.id);
-        router.replace('/(main)/chat');
+        router.replace('/(tabs)');
       } else {
         router.replace('/(onboarding)/step-1-identity');
       }
@@ -23,7 +23,7 @@ export default function Index() {
     <View className="flex-1 items-center justify-center bg-maya-bg">
       <Text className="text-maya-accent text-4xl font-bold mb-2">Maya</Text>
       <Text className="text-maya-muted mb-6">Ton coach fitness & nutrition</Text>
-      <ActivityIndicator color="#22D3EE" />
+      <ActivityIndicator color="#10b981" />
       <Pressable
         onPress={() => router.replace('/(onboarding)/step-1-identity')}
         className="mt-8 px-4 py-2"

@@ -27,7 +27,7 @@ export default function RootLayout() {
   if (!ready) {
     return (
       <View className="flex-1 items-center justify-center bg-maya-bg">
-        <ActivityIndicator color="#22D3EE" />
+        <ActivityIndicator color="#10b981" />
         <Text className="text-maya-muted mt-3">Préparation…</Text>
       </View>
     );
@@ -35,18 +35,22 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: '#0B0F14' },
-          headerTintColor: '#E5E7EB',
-          contentStyle: { backgroundColor: '#0B0F14' },
-          headerTitleStyle: { color: '#E5E7EB' },
+          headerStyle: { backgroundColor: '#ffffff' },
+          headerTintColor: '#1c1917',
+          contentStyle: { backgroundColor: '#fafaf9' },
+          headerTitleStyle: { color: '#1c1917', fontWeight: '700' },
+          headerShadowVisible: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        <Stack.Screen name="(main)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="exercise/[id]" options={{ title: 'Exercice' }} />
+        <Stack.Screen name="recipe/[id]" options={{ title: 'Recette' }} />
+        <Stack.Screen name="knowledge/[slug]" options={{ title: 'Savoir' }} />
       </Stack>
     </SafeAreaProvider>
   );

@@ -76,7 +76,7 @@ export function OnboardingStep({
           >
             <Text
               className={`font-semibold text-base ${
-                primaryDisabled ? 'text-maya-muted' : 'text-black'
+                primaryDisabled ? 'text-maya-muted' : 'text-white'
               }`}
             >
               {primaryLabel}

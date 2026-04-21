@@ -14,7 +14,7 @@ export function FormField({ label, hint, children, ...inputProps }: Props) {
       {hint ? <Text className="text-maya-muted text-xs mb-2">{hint}</Text> : null}
       {children ?? (
         <TextInput
-          placeholderTextColor="#6B7280"
+          placeholderTextColor="#a8a29e"
           className="bg-maya-panel border border-maya-border rounded-xl px-4 py-3 text-maya-text text-base"
           {...inputProps}
         />
@@ -39,7 +39,7 @@ export function OptionPill({ label, selected, onPress }: OptionProps) {
           : 'bg-maya-panel border-maya-border'
       }`}
     >
-      <Text className={selected ? 'text-black font-semibold' : 'text-maya-text'}>{label}</Text>
+      <Text className={selected ? 'text-white font-semibold' : 'text-maya-text'}>{label}</Text>
     </Pressable>
   );
 }
