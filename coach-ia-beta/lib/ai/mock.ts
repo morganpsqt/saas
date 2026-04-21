@@ -100,6 +100,68 @@ export async function mockReply(input: MockInput): Promise<string> {
     return `${name ? name + ', ' : ''}ce que tu décris m'inquiète et je veux qu'on en parle sérieusement. Je ne vais pas te donner de conseil de sèche dans ce contexte — ce n'est pas ce dont tu as besoin. En France, tu peux appeler Anorexie Boulimie Info Écoute au 0 810 037 037 (anonyme, gratuit) pour en parler à quelqu'un de formé. Je suis là pour t'accompagner sur l'équilibre et le mouvement, pas sur la privation. Tu veux qu'on avance ensemble dans cette direction ?`;
   }
 
+  // ---- prompt contextuel : exercice (détail page) ----
+  const exoMatch = msg.match(/exercice\s+"([^"]+)"/i) || msg.match(/exercice\s+«\s*([^»]+)\s*»/i);
+  if (exoMatch) {
+    const exoName = exoMatch[1].trim();
+    const eq = equipment(dossier);
+    const injuries = (dossier.match(/Blessures\s*:\s*([^\n]+)/i) || [])[1]?.trim();
+    const injuriesNote = injuries
+      ? ` Vu que tu as mentionné "${injuries}", reste vigilant si le mouvement sollicite cette zone.`
+      : '';
+    return `${namePart}bon choix pour "${exoName}". Les points clés génériques : technique avant charge, amplitude complète, tempo contrôlé (2-3 s en excentrique), et respiration bloc/relâche. Vise 3-4 séries de 6-12 reps à 1-2 reps de la réserve, charge progressive sur 2-4 semaines.${injuriesNote}${eq ? ` Avec ton équipement (${eq}), tu peux adapter le chargement sans souci.` : ''} Si tu veux, décris-moi comment tu le fais et je te corrige.`;
+  }
+
+  // ---- prompt contextuel : recette ----
+  const recetteMatch = msg.match(/recette\s+"([^"]+)"/i);
+  if (recetteMatch) {
+    const recetteName = recetteMatch[1].trim();
+    const pattern = dietaryPattern(dossier);
+    const intol = intolerances(dossier);
+    const goalMatch = (dossier.match(/OBJECTIF\s*:\s*([^\n]+)/i) || [])[1]?.trim().toLowerCase() ?? '';
+    const isLoss = /perte|s[eè]che|d[eé]ficit/.test(goalMatch);
+    const isGain = /prise|masse/.test(goalMatch);
+    const ing = (msg.match(/ingrédients principaux\s*:\s*([^)]+)\)/i) || [])[1];
+
+    const notes: string[] = [];
+    if (pattern && pattern !== 'omnivore' && ing) {
+      if (/viande|bœuf|boeuf|poulet|porc|agneau/i.test(ing) && /vege|vegan/.test(pattern)) {
+        notes.push(`⚠️ Les protéines animales ne collent pas à ton régime ${pattern} — remplace par tofu, tempeh ou légumineuses.`);
+      }
+    }
+    if (intol && ing && new RegExp(intol.split(/[, ]+/).filter(Boolean).join('|'), 'i').test(ing)) {
+      notes.push(`⚠️ Certains ingrédients sont dans tes intolérances (${intol}) — à adapter.`);
+    }
+    const objLine = isLoss
+      ? "Pour ta phase de perte : réduis les portions de glucides et de gras ajouté (~1/3 en moins), augmente les légumes et les protéines."
+      : isGain
+      ? "Pour ta prise de masse : ajoute facilement 200-300 kcal avec une portion de riz/patate en plus et un filet d'huile d'olive."
+      : "Pour du maintien, la recette telle quelle est déjà correcte.";
+    return `${namePart}"${recetteName}", globalement c'est bon. ${objLine}${notes.length ? '\n\n' + notes.join('\n') : ''}\n\nPetit astuce : si tu doubles la quantité de légumes, tu rassasies mieux sans exploser les kcal.`;
+  }
+
+  // ---- prompt contextuel : article Savoir ----
+  if (/explique.*sur\s+"[^"]+"/i.test(msg) || /plus sur "[^"]+"/i.test(msg)) {
+    const topic = (msg.match(/"([^"]+)"/) || [])[1] ?? 'ce sujet';
+    return `${namePart}parfait que tu sois tombé sur "${topic}". Le vrai enjeu pour toi, vu ton dossier, c'est de l'appliquer concrètement : choisis UNE chose à tester cette semaine (pas cinq), garde-la 7 jours, et ajuste selon comment tu te sens. La théorie c'est bien ; le faire, c'est ce qui change ton physique. Tu veux qu'on pick une action précise ensemble ?`;
+  }
+
+  // ---- prompt contextuel : exo rapide ce soir ----
+  if (/s[eé]ance rapide|exo rapide|entrainement? rapide/i.test(lower)) {
+    const eq = equipment(dossier);
+    const eqLine = eq ? ` avec ton équipement (${eq})` : '';
+    return `${namePart}version 20-25 min express${eqLine} :\n\n1. 5 min échauffement — mobilité hanches/épaules, un peu de corde ou rameur si dispo\n2. Circuit 3 tours, 40 s effort / 20 s repos :\n   • squat ou goblet squat\n   • poussée (pompes, dips, ou DC)\n   • tirage (rowing, traction, ou élastique)\n   • core (planche, ou relevé de jambes)\n3. 5 min retour au calme — étirements ou marche\n\nNiveau intensité : 7-8/10. Tu dois finir en ayant bien transpiré mais sans te cramer. Dis-moi si tu veux plus spécifique.`;
+  }
+
+  // ---- prompt contextuel : idée de repas simple ----
+  if (/id[ée]e? de repas|id[ée]e? de petit[- ]?d[ée]j/i.test(lower)) {
+    const pattern = dietaryPattern(dossier);
+    const base = pattern && /vege|vegan/.test(pattern)
+      ? `Bowl rapide : 150 g de tofu fumé poêlé + 100 g de quinoa (sec) + légumes verts sautés à l'ail + une demi-avocat + huile d'olive. ~550 kcal, ~25 g de protéines, rassasiant longtemps.`
+      : `Poulet-riz-légumes mode simple : 150 g de poulet rôti (ou 2 œufs + 100 g de thon), 80 g de riz cru (~250 g cuit), 200 g de brocolis vapeur, un filet d'huile d'olive, sel-poivre-citron. ~600 kcal, ~45 g de protéines, se prépare en 20 min.`;
+    return `${namePart}${base}\n\nSi tu veux, je t'en propose 3 autres variantes plus originales — dis-moi juste ce que tu as dans ton frigo.`;
+  }
+
   // ---- salutations ----
   if (includesAny(lower, ['bonjour', 'salut', 'hello', 'coucou', 'hey '])) {
     const opts = [
