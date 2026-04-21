@@ -72,4 +72,19 @@ test.describe("Profile page", () => {
     const img = page.locator(".prof-img img").first();
     await expect(img).toBeVisible({ timeout: 10_000 });
   });
+
+  test("display_name apparaît dans la salutation du dashboard", async ({ page }) => {
+    await page.goto("/app/parametres/profil");
+    const displayInput = page.locator('input[placeholder="Jean Martin"]');
+    const uniqueName = `Morgan-${Date.now().toString().slice(-5)}`;
+    await displayInput.fill(uniqueName);
+    await page.getByRole("button", { name: /Enregistrer/i }).click();
+    await page.waitForTimeout(1000);
+    await page.goto("/app");
+    // Greeting should contain the first word of the display_name
+    const firstWord = uniqueName.split(" ")[0];
+    await expect(page.getByText(new RegExp(firstWord))).toBeVisible({
+      timeout: 10_000,
+    });
+  });
 });

@@ -61,4 +61,22 @@ test.describe("Subscription gating", () => {
   test.skip("Pro user clicks 'Gérer mon abonnement' → Stripe portal", async () => {
     // Requires a real Stripe customer_id — can't be done without real Stripe checkout.
   });
+
+  test("Pro user visiting /subscribe is redirected back to /app", async ({ page }) => {
+    const email = genEmail("pro-redirect");
+    const u = await bootstrapUser(email);
+    await markOnboardingSeen(u.id);
+    await markSubscriptionPaid(u.id);
+    await loginViaUi(page, email);
+    await page.goto("/subscribe");
+    // Expect redirect away from /subscribe (back to /app) within a short delay
+    await page.waitForURL(/\/app(?!\/subscribe)/, { timeout: 10_000 });
+    await cleanupUser(email);
+  });
+
+  test("Unauthenticated user on /app redirects to /login", async ({ page, context }) => {
+    await context.clearCookies();
+    await page.goto("/app");
+    await page.waitForURL(/\/login/, { timeout: 10_000 });
+  });
 });
