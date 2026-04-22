@@ -47,3 +47,7 @@ next-env.d.ts
 tests/test-results/
 tests/playwright-report/
 tests/e2e/.last-run.json
+maya-web-dist/
+tests/maya-test-results/
+tests/maya-public-results/
+maya-web-dist/

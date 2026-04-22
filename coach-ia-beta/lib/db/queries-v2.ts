@@ -60,16 +60,15 @@ export async function getTodayHabits(userId: number): Promise<DailyHabit | null>
 }
 
 export async function ensureTodayHabits(userId: number): Promise<DailyHabit> {
-  const existing = await getTodayHabits(userId);
-  if (existing) return existing;
   const db = await getDb();
+  // INSERT OR IGNORE : safe contre les appels concurrents (UNIQUE(user_id, log_date))
   await db.runAsync(
-    'INSERT INTO daily_habits (user_id, log_date) VALUES (?, ?)',
+    'INSERT OR IGNORE INTO daily_habits (user_id, log_date) VALUES (?, ?)',
     [userId, todayStr()]
   );
-  const created = await getTodayHabits(userId);
-  if (!created) throw new Error('Failed to create today habit row');
-  return created;
+  const row = await getTodayHabits(userId);
+  if (!row) throw new Error('Failed to create today habit row');
+  return row;
 }
 
 export async function updateTodayHabits(
